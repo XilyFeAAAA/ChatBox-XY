@@ -1,2 +1,8 @@
 # SpecStory explanation file
 .specstory/.what-is-this.md
+.venv
+.python-version
+.cursorindexingignore
+pyproject.toml
+uv.lock
+__pycache__
