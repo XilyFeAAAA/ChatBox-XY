@@ -1,0 +1,19 @@
+{
+    "BASEURL": "http://192.168.31.195:9000",
+    "MESSAGE_QUEUE": {
+        "enable": true,
+        "interval": 1.0
+    },
+    "WHITELIST": {
+        "enable": false,
+        "users": [],
+        "chatrooms": ["49932184684@chatroom", "57624786022@chatroom"]
+    },
+    "PROTOCOL_PATH": "D:\\@DevCode\\projects\\chatbox\\chatbot-xy\\src\\XYWechatPad.exe",
+    "PROTOCOL_PORT": 9000,
+    "PROTOCOL_MODE": "release",
+    "REDIS_HOST": "127.0.0.1",
+    "REDIS_PORT": 6379,
+    "REDIS_PASSWORD": "",
+    "REDIS_DB": 0
+}
