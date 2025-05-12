@@ -46,11 +46,9 @@ class StatusMixIn(BaseMixIn):
             
     async def is_logged_in(self):
         try:
-            logger.debug("is_logged_in")
             await self.get_profile()
             self.is_logged = True
             return True
         except Exception as e:
-            logger.error(f"is_logged_in: {e}")
             return False
         

@@ -1,19 +1,23 @@
-from src.message import Message
 from src.model import MessageType
-from src.utils import logger
+from src.message import Message
+from src.bot import Bot
 from .rule import Rule
 from datetime import datetime
 
 
-matchers: dict[int, list["Matcher"]] = {}
+
+bot = Bot.get_instance()
+
 
 class Matcher:
+    
+    matchers: dict[int, list["Matcher"]] = {}
     
     def __init__(
         self,
         type,
-        rules,
-        handler,
+        rules: list[Rule],
+        handler: callable,
         priority: int,
         block: bool,
         temp: bool,
@@ -55,24 +59,46 @@ class Matcher:
         :return: Matcher实例
         """
         matcher = cls(type, rules, handler, priority, block, temp, expire_time, extra_args)
-        if priority not in matchers:
-            matchers[priority] = [matcher]
-        else:
-            matchers[priority].append(matcher)
+        Matcher.add_matcher(priority, matcher)
         return matcher
     
     
-    @staticmethod
-    def destory(matcher: "Matcher"):
-        if matcher.priority in matchers:
-            matchers[matcher.priority].remove(matcher)
+    def update_priority(self, priority: int):
+        if priority == self.priority: return
+        Matcher.remove_matcher(self)
+        Matcher.add_matcher(priority, self)
     
+    
+    
+    @classmethod
+    def add_matcher(cls, priority: int, matcher: "Matcher"):
+        if priority not in cls.matchers:
+            cls.matchers[priority] = [matcher]
+        else:
+            cls.matchers[priority].append(matcher)
+    
+    
+    @staticmethod
+    def remove_matcher(matcher: "Matcher"):
+        if matcher.priority in Matcher.matchers:
+            Matcher.matchers[matcher.priority].remove(matcher)
+    
+    
+    @classmethod
+    async def handle_message(cls, msg: dict):
+        if not (msg := await Message.new(msg)):
+            return
+        for priority in sorted(cls.matchers.keys(), reverse=True):
+            for matcher in cls.matchers[priority]:
+                if await check_and_run_matcher(matcher, msg) and matcher.block:
+                    return 
+    
+        
     def __repr__(self):
         return (
             f"<Matcher handler={self.handler.__name__} "
             f"type={self.type} "
             f"rules={[str(r) for r in self.rules]} "
-            f"permissions={[str(p) for p in self.permissions]} "
             f"priority={self.priority} "
             f"block={self.block} "
             f"temp={self.temp} "
@@ -85,25 +111,16 @@ async def check_and_run_matcher(matcher: Matcher, msg: Message) -> bool:
         return False
     # 过期检查
     if matcher.expire_time and datetime.now() > matcher.expire_time:
-        Matcher.destory(matcher)
+        Matcher.remove_matcher(matcher)
         return False
     # 规则检查
     for rule in matcher.rules:
         if not rule.check(msg):
             return False
     # 运行 matcher
-    await matcher.handler(msg, **matcher.extra_args)
+    await matcher.handler(bot, msg, **matcher.extra_args)
     # 一次性检查
     if matcher.temp:
-        Matcher.destory(matcher)
+        Matcher.remove_matcher(matcher)
     return True
 
-
-async def handle_message(msg: dict):
-    if msg := await Message.new(msg):
-        for priority in sorted(matchers.keys(), reverse=True):
-            for matcher in matchers[priority]:
-                if await check_and_run_matcher(matcher, msg) and matcher.block:
-                    return
-            
-            

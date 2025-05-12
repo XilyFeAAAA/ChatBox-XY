@@ -1,8 +1,9 @@
 from src.config import conf
 from loguru import logger
 from urllib.parse import urlencode
+import sys
 import aiohttp
-
+import asyncio
 
 async def post_json(route, *, body={}, query={}, headers={}) -> dict:
     url = conf().get("BASEURL") + route

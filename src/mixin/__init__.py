@@ -7,3 +7,4 @@ from .chatroom import ChatroomMixIn
 from .friend import FriendMixIn
 from .protocol import ProtocolMixin
 from .tool import ToolMixIn
+from .plugin import PluginMixin

@@ -1,0 +1,36 @@
+import os
+
+
+# API and Model Configuration
+OPENAI_API_KEY: str = "sk-IOngWCiVG5lPcgZU5zx2YTtg9BB6YAXqYsEFfjDhdJUz3TZt"
+if not OPENAI_API_KEY:
+    raise ValueError("未设置OPENAI_API_KEY")
+
+CHAT_MODEL:str = "deepseek-v3"
+SUMMARY_MODEL: str = "deepseek-r1"
+
+MODEL_TOKEN_MAP: dict[str, int] = {
+    "gpt-4": 8192,
+    "gpt-4.5": 8192
+}
+
+MAX_MODEL_TOKEN: int = MODEL_TOKEN_MAP.get(CHAT_MODEL)
+MAX_RESPONSE_TOKEN: int = 1000
+MAX_INPUT_TOKEN: int = MAX_MODEL_TOKEN - MAX_RESPONSE_TOKEN
+
+# Summary Strategy
+SUMMARY_TRIGGLE_TOKEN_RATIO: float = 0.7
+PRESERVED_MESSAGES_COUNT: int = 5
+
+MESSAGES_CHUNK_FOR_SUMMARY: int = 10
+DEFUALT_SYSTEM_PROMPT: str = ""
+DEFAULT_SUMMARY_PROMPT: str = ""
+SYSTEM_PROMPT_OVERRIDE: bool = False
+
+
+# LLM Client
+REQUEST_TIMEOUT: int = 30
+MAX_RETRIES: int = 3
+RETRY_DELAY: int = 5
+CHAT_TEMPERTURE: float = 0.7
+SUMMARY_TEMPERTURE: float = 0.4

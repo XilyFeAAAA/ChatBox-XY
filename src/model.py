@@ -39,6 +39,12 @@ class CacheType(str, Enum):
     FRIEND = "friend"
     CHATROOM = "chatroom"
     CONTACT = "contact"
+    
+    
+class XmlType(int, Enum):
+    QUOTE = 57
+    FILE = 6
+    UPLOAD = 74
 
     
 @dataclass
@@ -93,6 +99,8 @@ class Contact:
     """群聊列表"""
     ghs: list[str] = field(default_factory=list)
     """公众号列表"""    
+
+
 
 
 @dataclass

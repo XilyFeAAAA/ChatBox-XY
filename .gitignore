@@ -1,8 +1,12 @@
 # SpecStory explanation file
-.specstory/.what-is-this.md
+.specstory
+.specstory/
+.gitignore
 .venv
 .python-version
 .cursorindexingignore
 pyproject.toml
 uv.lock
 __pycache__
+# SpecStory explanation file
+.specstory/.what-is-this.md

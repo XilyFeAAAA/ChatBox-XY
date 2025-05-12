@@ -61,14 +61,24 @@ def print_code_chain(exc_traceback, exc_type=None, exc_value=None):
 
 
 def global_exception_handler(exc_type, exc_value, exc_traceback):
+    # 忽略任务取消异常
+    if exc_type is asyncio.CancelledError:
+        return
     print_code_chain(exc_traceback, exc_type, exc_value)
 
 
 def asyncio_exception_handler(loop, context):
     exc = context.get("exception")
     if exc:
+        # 忽略任务取消异常
+        if isinstance(exc, asyncio.CancelledError):
+            return
         global_exception_handler(type(exc), exc, exc.__traceback__)
     else:
+        msg = context.get("message", "")
+        # 忽略取消任务相关消息
+        if "was cancelled" in msg or "cancelling" in msg:
+            return
         print("异步异常上下文：", context)
 
 

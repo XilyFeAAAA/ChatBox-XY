@@ -11,16 +11,16 @@ class LoginMixIn(BaseMixIn):
     
     async def login(self):
         if not await self.is_logged_in():
-            if await self.get_cached_info():
-                logger.debug("尝试唤醒登录")
-                if uuid :=await self.revoke_login():
-                    self.uuid = uuid
-                    logger.success(f"唤醒登录成功,获取到登录uuid: {self.wxid}")
-                else:
-                    logger.error("唤醒登录失败,尝试二维码登录")
-                    await self.qrcode_login()
-            else:
-                await self.qrcode_login()
+            # if await self.get_cached_info():
+            #     logger.debug("尝试唤醒登录")
+            #     if uuid :=await self.revoke_login():
+            #         self.uuid = uuid
+            #         logger.success(f"唤醒登录成功,获取到登录uuid: {self.wxid}")
+            #     else:
+            #         logger.error("唤醒登录失败,尝试二维码登录")
+            #         await self.qrcode_login()
+            # else:
+            await self.qrcode_login()
         else:
             profile = await self.get_profile()
             self.nickname = profile.get("NickName", {}).get("string", "")
@@ -80,7 +80,6 @@ class LoginMixIn(BaseMixIn):
             if stat: break
             logger.info(f"等待登录中，过期倒计时：{data}")
             await asyncio.sleep(5)
-        logger.debug(data)
         self.wxid = data.get("userName")
         self.nickname = data.get("NickName")
         self.alias = data.get("Alais")

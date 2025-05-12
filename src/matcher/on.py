@@ -5,7 +5,7 @@ from .rule import Rule, startswith, endswith, fullmatch, command, keyword, regex
 def on_message(*args, **kwargs):
     kwargs.setdefault("type", MessageType.Text)
     def decorator(func):
-        Matcher.new(func, *args, **kwargs)
+        func.__matcher__ = Matcher.new(func, *args, **kwargs)
         return func
     return decorator
 

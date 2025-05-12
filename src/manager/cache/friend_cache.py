@@ -20,7 +20,6 @@ class FriendCache(Cache):
             raise RuntimeError(f"获取好友信息失败，错误提示:返回联系人数量为{len(friends)}")
         
         logger.info(f"好友{wxid}信息已缓存")
-        logger.debug(friends[0])
         return self._set(wxid, {
             'wxid': wxid,
             'nickname': friends[0].get("UserName", {}).get("string"),

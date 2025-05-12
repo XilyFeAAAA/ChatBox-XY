@@ -1,13 +1,12 @@
 from src.mixin import *
-from src.utils import logger, MessageWrapper, MessageQueue, Whitelist
+from src.utils import logger, Whitelist
 from src.config import conf
 import sys
 import asyncio
-import pkgutil
-import importlib
 
 
-class Bot(MessageMixIn, LoginMixIn, StatusMixIn, UserMixIn, ChatroomMixIn, FriendMixIn, ProtocolMixin, ToolMixIn):
+class Bot(MessageMixIn, LoginMixIn, StatusMixIn, UserMixIn, 
+          ChatroomMixIn, FriendMixIn, ProtocolMixin, ToolMixIn, PluginMixin):
     """机器人"""
     _instance = None
 
@@ -17,8 +16,9 @@ class Bot(MessageMixIn, LoginMixIn, StatusMixIn, UserMixIn, ChatroomMixIn, Frien
     
     async def preload(self):
         self.load_status()
-        self.load_plugin()
+        await self.load_plugin_from_dictionary()
         self.load_whitelist()
+        self.use_queue()
         await self.start_protocol(
             executable_path=conf().get("PROTOCOL_PATH"),
             port=conf().get("PROTOCOL_PORT"),
@@ -28,7 +28,7 @@ class Bot(MessageMixIn, LoginMixIn, StatusMixIn, UserMixIn, ChatroomMixIn, Frien
             redis_password=conf().get("REDIS_PASSWORD"),
             redis_db=conf().get("REDIS_DB")
         )
-        time_out = 10
+        time_out = 4
         while not await self.is_running() and time_out > 0:
             logger.info("等待WechatAPI启动中")
             await asyncio.sleep(2)
@@ -47,16 +47,6 @@ class Bot(MessageMixIn, LoginMixIn, StatusMixIn, UserMixIn, ChatroomMixIn, Frien
             cls._instance = cls()
         return cls._instance
 
-    def load_plugin(self):
-        plugin_packages = pkgutil.iter_modules(path=["src/plugin"])
-        
-        # 2. 遍历扫描到的模块/包
-        for _, name, ispkg in plugin_packages:
-            # 3. 检查是否是包（文件夹，而非单文件）
-            if ispkg and not name.startswith('_'):  # 如果是包（文件夹）
-                # 4. 动态导入该包（如 "plugin.plugin1"）
-                importlib.import_module(f"src.plugin.{name}")
-                logger.info(f"成功导入插件：{name}")
     
     def load_whitelist(self):
         whitelist_config = conf().get("WHITELIST", {})
@@ -70,13 +60,13 @@ class Bot(MessageMixIn, LoginMixIn, StatusMixIn, UserMixIn, ChatroomMixIn, Frien
                
     
     def use_queue(self):
-        enable =  conf().get("Message_QUEUE",{}).get("enable", False)
-        interval = conf().get("Message_QUEUE",{}).get("interval", 1.0)
+        
+        enable =  conf().get("MESSAGE_QUEUE",{}).get("enable", False)
+        interval = conf().get("MESSAGE_QUEUE",{}).get("interval", 1.0)
         try:
             if enable:
-                queue = MessageQueue(interval)
-                queue.start()
-                MessageWrapper.wrap_send_methods(MessageMixIn)
+                from src.message import  MessageQueue
+                MessageQueue.get_instance(interval).start()
                 logger.info(f"消息队列已启动，全局发送间隔 {interval} 秒")
             else:
                 logger.info("消息队列已禁用，消息将立即发送")
@@ -90,14 +80,14 @@ class Bot(MessageMixIn, LoginMixIn, StatusMixIn, UserMixIn, ChatroomMixIn, Frien
     
     
     async def destory(self):
+        from src.message import MessageQueue
         self.is_logged = False
         if await self.status_auto_heartbeat():
             await self.stop_auto_heartbeat()
         try:
             await self.stop_protocol()
             logger.info("微信协议已关闭")
-            queue = MessageQueue.get_instance()
-            queue.stop()
+            MessageQueue.get_instance().stop()
             logger.info("消息队列已关闭")
         except Exception as e:
             logger.warning(f"关闭消息队列时出错: {e}")

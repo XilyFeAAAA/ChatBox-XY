@@ -1,6 +1,10 @@
-from src.utils.http import post_json
+from src.utils import post_json, logger
+from src.message.queue import MessageQueue
 from .base import BaseMixIn
 
+
+
+queue = MessageQueue.get_instance()
 
 class MessageMixIn(BaseMixIn):
     
@@ -13,12 +17,17 @@ class MessageMixIn(BaseMixIn):
             "Synckey": ""
         }
         resp = await post_json("/Sync", body=param)
-        if resp.get("Success", False):
+        if resp.get("Success", False):  
             return True, resp.get("Data")
         else:
             return False, resp.get("Message")
     
+    
     async def send_text(self, to_wxid: str, content: str, at: str = "", type_: int = 1):
+        """调用消息队列"""
+        queue.add_message(self._send_text, to_wxid, content, at, type_)
+    
+    async def _send_text(self, to_wxid, content: str, at: str = "", type_: int = 1):
         """发送文本消息，type=1文本，at为@人wxid，多个用,隔开"""
         param = {
             "ToWxid": to_wxid,
@@ -92,6 +101,10 @@ class MessageMixIn(BaseMixIn):
     #         self.error_handler(resp)
 
     async def send_link(self, to_wxid: str, title: str, desc: str, url: str, thumb_url: str):
+        queue.add_message(self._send_link, to_wxid, title, desc, url, thumb_url)
+        
+        
+    async def _send_link(self, to_wxid: str, title: str, desc: str, url: str, thumb_url: str):
         """发送分享链接消息"""
         param = {
             "ToWxid": to_wxid,
