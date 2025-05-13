@@ -1,5 +1,5 @@
 {
-    "BASEURL": "http://172.21.4.17:9000",
+    "BASEURL": "http://127.0.0.1:9000",
     "MESSAGE_QUEUE": {
         "enable": true,
         "interval": 2
@@ -7,7 +7,7 @@
     "WHITELIST": {
         "enable": true,
         "users": [],
-        "chatrooms": [ "57624786022@chatroom"]
+        "chatrooms": ["49932184684@chatroom", "57624786022@chatroom"]
     },
     "PROTOCOL_PATH": "D:\\@DevCode\\projects\\chatbox\\chatbot-xy\\src\\XYWechatPad.exe",
     "PROTOCOL_PORT": 9000,

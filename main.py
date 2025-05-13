@@ -3,7 +3,6 @@ from src.bot import Bot
 from src.utils import logger, set_exception_handler, safe_create_task
 import atexit
 import asyncio
-import signal
 import sys
 
 

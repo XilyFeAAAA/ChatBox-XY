@@ -19,4 +19,4 @@ class Echo(PluginBase):
         else:
             source_ = '群聊'
             from_ = msg.chatroom.nickname
-        logger.info(f"接受到{source_}消息,来自{from_},内容为{msg.text}")
+        logger.info(f"接受到{source_}{msg.from_wxid}消息,来自{from_},内容为{msg.text}")

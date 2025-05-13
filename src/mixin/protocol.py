@@ -18,14 +18,15 @@ class ProtocolMixin(BaseMixIn):
     async def start_protocol(self, executable_path, port, mode, redis_host, redis_port, redis_password, redis_db):
         """异步启动服务"""
         command = [
-            "D:/@DevCode/projects/chatbox/chatbot-xy/src/XYWechatPad.exe",
-            "-p", str(port),
-            "-m", mode,
-            "-rh", redis_host,
-            "-rp", str(redis_port),
-            "-rpwd", redis_password,
-            "-rdb", str(redis_db)
+            r"D:/@DevCode/github/XYBotV2/WechatAPI/core/XYWechatPad.exe",
+            "-p", "9000",
+            "-m", "release",
+            "-rh", "127.0.0.1",
+            "-rp", "6379",
+            "-rpwd", "",
+            "-rdb", "0"
         ]
+        logger.debug("准备启动服务")
         # 使用异步创建子进程
         self.process = await asyncio.create_subprocess_exec(
             *command,
@@ -34,6 +35,9 @@ class ProtocolMixin(BaseMixIn):
             stderr=asyncio.subprocess.PIPE,
             creationflags=subprocess.CREATE_NEW_CONSOLE
         )
+        logger.debug(f"服务已启动，PID: {self.process.pid}")
+        logger.debug("已启动服务")
+        
         
         
     async def stop_protocol(self):
